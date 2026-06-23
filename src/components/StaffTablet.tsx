@@ -36,13 +36,19 @@ function BubblePlayButton({
       className="w-4.5 h-4.5 rounded-full bg-white/70 hover:bg-white flex items-center justify-center cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-40"
       onClick={onClick}
       disabled={disabled}
-      title="Play"
-      aria-label="Replay this message"
+      title={active ? "Stop" : "Play"}
+      aria-label={active ? "Stop playback" : "Replay this message"}
     >
-      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={active ? "#E81932" : "#9CA3AF"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M11 5 6 9H3v6h3l5 4V5z"></path>
-        <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
-      </svg>
+      {active ? (
+        <svg width="7" height="7" viewBox="0 0 24 24" fill="#E81932">
+          <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+        </svg>
+      ) : (
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M11 5 6 9H3v6h3l5 4V5z"></path>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+        </svg>
+      )}
     </button>
   );
 }
@@ -51,9 +57,10 @@ interface StaffTabletProps {
   session: Doc<"sessions">;
   messages: Doc<"messages">[];
   fullscreen?: boolean;
+  onNewConversation?: () => void;
 }
 
-export function StaffTablet({ session, messages, fullscreen }: StaffTabletProps) {
+export function StaffTablet({ session, messages, fullscreen, onNewConversation }: StaffTabletProps) {
   const convex = useConvex();
   const chips = useQuery(api.chips.list);
   const sendInstant = useMutation(api.messages.sendInstant);
@@ -78,6 +85,11 @@ export function StaffTablet({ session, messages, fullscreen }: StaffTabletProps)
   // canned chip message sent before chunked synthesis, or synthesis that
   // never completed).
   async function replayMessage(message: Doc<"messages">, lang: string) {
+    if (playingMessageId === message._id) {
+      synth.stop();
+      playback.stop();
+      return;
+    }
     setPlayingMessageId(message._id);
     const chunks = await convex.query(api.messages.listAudioChunks, { messageId: message._id });
     if (chunks.length > 0) {
@@ -124,7 +136,13 @@ export function StaffTablet({ session, messages, fullscreen }: StaffTabletProps)
   // translation" field, since staff's UI already derives from the message
   // list directly (lastPassengerMessage above) instead of a single session
   // field the way the passenger side does.
-  const playedForMessageIdRef = useRef<string | null>(null);
+  // Two distinct refs, not one shared one: each path needs to check whether
+  // the OTHER path already claimed this message, without being blocked by
+  // its own prior writes — chunks legitimately arrive in several batches
+  // (one per sentence) for the same message, so the chunk path must be free
+  // to re-enter for message X after it already claimed message X once.
+  const fallbackSpokeIdRef = useRef<string | null>(null);
+  const chunkPathStartedIdRef = useRef<string | null>(null);
   const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fallback: the streaming pipeline starts synthesizing audio chunks the
@@ -148,10 +166,10 @@ export function StaffTablet({ session, messages, fullscreen }: StaffTabletProps)
     if (!lastPassengerMessage) return;
     const messageId = lastPassengerMessage._id;
     fallbackTimerRef.current = setTimeout(() => {
-      if (playedForMessageIdRef.current === messageId) return; // the chunk path already played it
+      if (chunkPathStartedIdRef.current === messageId) return; // the chunk path already claimed it
       const text = lastPassengerMessageRef.current?.translated ?? "";
       if (!text.trim()) return; // nothing streamed in yet — leave it for the chunk path to handle
-      playedForMessageIdRef.current = messageId;
+      fallbackSpokeIdRef.current = messageId;
       void synth.speak(text, sessionRef.current.fromLang).catch((err) => console.error("speak failed:", err));
     }, 4000);
     return () => {
@@ -161,17 +179,24 @@ export function StaffTablet({ session, messages, fullscreen }: StaffTabletProps)
   }, [lastPassengerMessage?._id]);
 
   // Primary path: feed audio chunks into the playback queue as soon as
-  // they're synthesized — no fresh TTS call needed. Never on mount,
-  // mirroring the fallback effect above.
-  const chunksHasMountedRef = useRef(false);
+  // they're synthesized — no fresh TTS call needed. Guarded by message id,
+  // not a "first render" flag: `chunks` itself starts as `undefined` while
+  // the query loads and only resolves to real data a moment after mount,
+  // which is a SECOND distinct value for this effect's dependency even when
+  // it's for the same old message that was already there before the page
+  // loaded — a "skip just the first call" flag gets fooled by that and
+  // auto-plays whatever the last message already was on every reload.
+  // Comparing against the id snapshotted at mount instead correctly tells
+  // "stale history" apart from "a new message arrived after I mounted." It
+  // legitimately re-enters once per arriving batch of chunks (one per
+  // streamed sentence) for a genuinely new message, so it must keep
+  // ingesting on every call, not just the first.
+  const initialMessageIdRef = useRef(lastPassengerMessage?._id);
   useEffect(() => {
-    if (!chunksHasMountedRef.current) {
-      chunksHasMountedRef.current = true;
-      return;
-    }
     if (!chunks || chunks.length === 0 || !lastPassengerMessage) return;
-    if (playedForMessageIdRef.current === lastPassengerMessage._id) return; // the fallback already spoke this one
-    playedForMessageIdRef.current = lastPassengerMessage._id;
+    if (lastPassengerMessage._id === initialMessageIdRef.current) return; // already existed when this page loaded — don't auto-replay history
+    if (fallbackSpokeIdRef.current === lastPassengerMessage._id) return; // the fallback already spoke this one
+    chunkPathStartedIdRef.current = lastPassengerMessage._id;
     if (fallbackTimerRef.current) {
       clearTimeout(fallbackTimerRef.current);
       fallbackTimerRef.current = null;
@@ -180,7 +205,15 @@ export function StaffTablet({ session, messages, fullscreen }: StaffTabletProps)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chunks]);
 
+  // Toggle: if something's audibly playing, this tap means "stop it" rather
+  // than "restart it" — there was previously no way to silence playback
+  // once started short of leaving the page.
   function replayPassenger() {
+    if (synth.speaking || playback.speaking) {
+      synth.stop();
+      playback.stop();
+      return;
+    }
     if (chunks && chunks.length > 0) {
       playback.replay();
       return;
@@ -247,6 +280,19 @@ export function StaffTablet({ session, messages, fullscreen }: StaffTabletProps)
             <div className="w-2 h-2 rounded-full bg-aero-green animate-[aeroLive_1.6s_ease-in-out_infinite]" />
             <span className="text-[13px] font-semibold text-aero-green">Live</span>
           </div>
+          {onNewConversation && (
+            <button
+              className="bg-gray-100 hover:bg-gray-200 rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-zinc-900 cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => {
+                if (messages.length > 0 && !window.confirm("Start a new conversation? This abandons the current one.")) return;
+                onNewConversation();
+              }}
+              disabled={recog.recording || recog.processing}
+              title="Start a new conversation with a fresh QR code"
+            >
+              New conversation
+            </button>
+          )}
         </div>
       </div>
 
@@ -376,22 +422,19 @@ export function StaffTablet({ session, messages, fullscreen }: StaffTabletProps)
                     className="w-5 h-5 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={replayPassenger}
                     disabled={!synth.supported}
-                    title={synth.supported ? "Replay" : "Speech synthesis isn't supported in this browser"}
-                    aria-label="Replay passenger's translated speech"
+                    title={!synth.supported ? "Speech synthesis isn't supported in this browser" : synth.speaking || playback.speaking ? "Stop" : "Replay"}
+                    aria-label={synth.speaking || playback.speaking ? "Stop playback" : "Replay passenger's translated speech"}
                   >
-                    <svg
-                      width="11"
-                      height="11"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={synth.speaking || playback.speaking ? "#E81932" : "#9CA3AF"}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M11 5 6 9H3v6h3l5 4V5z"></path>
-                      <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
-                    </svg>
+                    {synth.speaking || playback.speaking ? (
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="#E81932">
+                        <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                      </svg>
+                    ) : (
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M11 5 6 9H3v6h3l5 4V5z"></path>
+                        <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+                      </svg>
+                    )}
                   </button>
                 </div>
               )}

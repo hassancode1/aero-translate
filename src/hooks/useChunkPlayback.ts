@@ -106,13 +106,28 @@ export function useChunkPlayback() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pump only reads/writes refs, identical behavior every render
   }, []);
 
-  // Abandons the current queue and starts fresh for a new utterance.
+  // Abandons the current queue and starts fresh for a new utterance. Unlike
+  // stop() below, this doesn't pause the element — reset() is for switching
+  // to a different message's queue (which immediately pumps new audio in),
+  // not for silencing playback the user wants to actually stop.
   const reset = useCallback(() => {
     requestIdRef.current++;
     queueRef.current = new Map();
     nextIndexRef.current = 0;
     playingRef.current = false;
     setSpeaking(false);
+  }, []);
+
+  // Actually silences whatever's audibly playing right now, for a "pause/
+  // stop" control. Bumping requestId alone (what reset() does) only stops
+  // *future* chunks from continuing — the currently-playing element keeps
+  // making sound until it naturally ends, since nothing else ever calls
+  // pause() on it. Keeps the queue intact so replay() can still restart it.
+  const stop = useCallback(() => {
+    requestIdRef.current++;
+    playingRef.current = false;
+    setSpeaking(false);
+    if (mainElRef.current) mainElRef.current.pause();
   }, []);
 
   // Replays the full sequence from the start (e.g. a "replay" button).
@@ -124,5 +139,5 @@ export function useChunkPlayback() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pump only reads/writes refs, identical behavior every render
   }, []);
 
-  return { supported, speaking, ingest, reset, replay, unlock };
+  return { supported, speaking, ingest, reset, replay, unlock, stop };
 }

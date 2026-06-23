@@ -96,5 +96,15 @@ export function useGeminiSpeech() {
     [supported],
   );
 
-  return { supported, speaking, speak, speakFromUrl, unlock };
+  // Silences whatever's audibly playing right now, for a "pause/stop"
+  // control — bumping requestIdRef alone only stops a stale async response
+  // from later starting playback, it doesn't pause an element already
+  // making sound.
+  const stop = useCallback(() => {
+    requestIdRef.current++;
+    setSpeaking(false);
+    if (audioElRef.current) audioElRef.current.pause();
+  }, []);
+
+  return { supported, speaking, speak, speakFromUrl, unlock, stop };
 }

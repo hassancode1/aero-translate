@@ -40,6 +40,14 @@ export function Home() {
     }
   }, [code, session]);
 
+  // Abandons the current session code (old data stays in the DB, just
+  // unused) and reuses the same creation path above to get a fresh one —
+  // for ending one passenger's conversation and starting the next.
+  function newConversation() {
+    localStorage.removeItem(STORAGE_KEY);
+    setCode(null);
+  }
+
   if (!session || !messages) {
     return <StatusScreen title="Setting up session…" />;
   }
@@ -49,7 +57,7 @@ export function Home() {
   return (
     <div className="h-screen overflow-hidden flex flex-col bg-gray-50">
       <div className="flex-1 min-h-0">
-        <StaffTablet session={session} messages={messages} />
+        <StaffTablet session={session} messages={messages} onNewConversation={newConversation} />
       </div>
       <div className="flex-none mx-auto mt-8 mb-12 w-[min(1080px,calc(100vw-120px))] max-w-[calc(100%-64px)] bg-white shadow-sm rounded-3xl px-6.5 py-5.5 flex items-center justify-between gap-6">
         <div className="flex flex-col gap-1.5">
