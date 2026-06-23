@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>AeroTranslate Pitch Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --red: #e81932;
+    --red-pressed: #c9152b;
+    --green: #16a34a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  @page { size: 13.333in 7.5in; margin: 0; }
+
+  .slide {
+    width: 1280px;
+    height: 720px;
+    position: relative;
+    overflow: hidden;
+    padding: 64px 80px;
+    page-break-after: always;
+  }
+  .slide:last-of-type { page-break-after: auto; }
+
+  .dark { background: #09090b; color: #fff; }
+  .light { background: #ffffff; color: #18181b; }
+  .tint { background: #fafafa; color: #18181b; }
+
+  .dotgrid {
+    position: absolute; inset: 0; opacity: 0.35;
+    background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+
+  .eyebrow {
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+  }
+  .eyebrow.on-light { color: var(--red); }
+  .eyebrow.on-dark { color: #fda4af; }
+
+  h1.title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600;
+    font-size: 46px;
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+    margin: 14px 0 0 0;
+  }
+  h1.title.small { font-size: 38px; }
+
+  p.lede {
+    font-size: 19px;
+    line-height: 1.55;
+    max-width: 760px;
+    margin-top: 18px;
+  }
+  .light p.lede, .tint p.lede { color: #52525b; }
+  .dark p.lede { color: #a1a1aa; }
+
+  .footer {
+    position: absolute;
+    left: 80px; right: 80px; bottom: 34px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  .light .footer, .tint .footer { color: #a1a1aa; }
+  .dark .footer { color: #71717a; }
+  .footer .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(135deg, var(--red), var(--red-pressed)); flex: none; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #f0f0f1;
+    border-radius: 22px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    padding: 26px 28px;
+  }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 999px; padding: 7px 16px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em;
+  }
+  .pill.dark-pill { border: 1px solid rgba(232,25,50,0.4); background: rgba(232,25,50,0.1); color: #fda4af; }
+
+  .bullets { display: flex; flex-direction: column; gap: 20px; margin-top: 34px; }
+  .bullet { display: flex; gap: 16px; align-items: flex-start; }
+  .bullet .num {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 600; font-size: 14px;
+    color: var(--red);
+    width: 30px; flex: none;
+  }
+  .bullet .txt { font-size: 17px; line-height: 1.5; color: #3f3f46; }
+  .bullet .txt b { color: #18181b; }
+
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 38px; }
+  .step-card {
+    background: #fff; border: 1px solid #f0f0f1; border-radius: 22px;
+    padding: 28px 26px; display: flex; flex-direction: column; gap: 14px;
+  }
+  .step-icon {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--red), var(--red-pressed));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 15px;
+  }
+  .step-title { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 17px; color: #18181b; }
+  .step-body { font-size: 14.5px; line-height: 1.5; color: #71717a; }
+
+  table.cmp { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 14.5px; }
+  table.cmp th, table.cmp td { border: 1px solid #ececef; padding: 14px 16px; text-align: left; vertical-align: top; }
+  table.cmp th { background: #fafafa; font-family: "Space Grotesk", sans-serif; font-weight: 600; color: #18181b; font-size: 13px; }
+  table.cmp td { color: #52525b; line-height: 1.45; }
+  table.cmp td.yes { color: #15803d; font-weight: 600; }
+  table.cmp tr.us td { background: #fff5f6; }
+  table.cmp tr.us td:first-child { font-weight: 700; color: var(--red); }
+
+  .team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 34px; }
+  .team-card { background: #fff; border: 1px solid #f0f0f1; border-radius: 22px; padding: 26px 24px; }
+  .team-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--red), var(--red-pressed));
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 16px; margin-bottom: 14px;
+  }
+  .team-name { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 16px; color: #18181b; }
+  .team-role { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--red); margin-top: 2px; margin-bottom: 10px; }
+  .team-bio { font-size: 13.5px; line-height: 1.5; color: #71717a; }
+
+  .lang-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 30px; }
+  .lang-chip {
+    background: #fff; border: 1px solid #f0f0f1; border-radius: 14px;
+    padding: 12px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    font-size: 12px; font-weight: 600; color: #3f3f46;
+  }
+  .lang-chip .flag { font-size: 20px; }
+  .lang-chip.hl { border-color: rgba(232,25,50,0.4); background: #fff5f6; color: var(--red); }
+
+  .phone-mock {
+    position: absolute; width: 250px; background: #fff; border-radius: 22px;
+    border: 1px solid rgba(0,0,0,0.06); padding: 16px;
+  }
+  .phone-live { display: flex; align-items: center; gap: 7px; margin-bottom: 12px; }
+  .phone-live .ld { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+  .phone-bubble-a { background: #f4f4f5; border-radius: 4px 16px 16px 16px; padding: 12px 14px; }
+  .phone-bubble-b { background: #fbeaec; border-radius: 16px 4px 16px 16px; padding: 12px 14px; text-align: right; }
+
+  .ask-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 34px; }
+  .ask-card { background: #fff; border: 1px solid #f0f0f1; border-radius: 22px; padding: 24px 26px; }
+  .ask-card .lbl { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 15px; color: #18181b; margin-bottom: 8px; }
+  .ask-card .body { font-size: 14.5px; line-height: 1.5; color: #52525b; }
+</style>
+</head>
+<body>
+
+<!-- 1. TITLE -->
+<section id="slide1" class="slide dark">
+  <div class="dotgrid"></div>
+  <div style="position:relative; height:100%; display:flex; flex-direction:column; justify-content:center;">
+    <div class="pill dark-pill" style="width:fit-content;">For ground &amp; cabin crews</div>
+    <h1 class="title" style="font-size:60px; margin-top:24px; max-width:920px;">Say it once.<br/>They hear it in <span style="color:var(--red);">their</span> language.</h1>
+    <p class="lede" style="max-width:620px;">AeroTranslate is a real-time, two-way speech translator for airline ground and cabin crews — no shared language required, no app for the passenger to install.</p>
+  </div>
+  <div class="footer">
+    <div class="brand"><span class="dot"></span><span style="color:#fff;">AeroTranslate</span></div>
+    <span>Hassan Jaeh &middot; Ahmad Rufai Yusuf &middot; Hussain Ilyasu</span>
+  </div>
+</section>
+
+<!-- 2. PROBLEM -->
+<section id="slide2" class="slide light">
+  <span class="eyebrow on-light">The problem</span>
+  <h1 class="title small">Airports run on language — and constantly run out of it</h1>
+  <div class="bullets">
+    <div class="bullet"><span class="num">01</span><span class="txt">Ground and cabin crews deal with passengers who don't speak their language <b>every shift, at every gate</b> — boarding changes, baggage issues, missed connections, medical situations.</span></div>
+    <div class="bullet"><span class="num">02</span><span class="txt">Today's fallback is slow and incomplete: find a bilingual colleague, call a phone interpretation line, or hand over a phone and hope a translation app gets the meaning across.</span></div>
+    <div class="bullet"><span class="num">03</span><span class="txt">The cost shows up as longer interactions, escalations, missed flights, and staff who can't do their job with full confidence — in an industry where minutes at the gate matter.</span></div>
+    <div class="bullet"><span class="num">04</span><span class="txt">This isn't a rare edge case. It's a daily, recurring operational gap at every international airport.</span></div>
+  </div>
+  <div class="footer"><div class="brand"><span class="dot"></span><span>AeroTranslate</span></div><span>02</span></div>
+</section>
+
+<!-- 3. SOLUTION -->
+<section id="slide3" class="slide light">
+  <span class="eyebrow on-light">The solution</span>
+  <h1 class="title small">A live translator that lives in the conversation, not an app passengers have to find</h1>
+  <div class="bullets">
+    <div class="bullet"><span class="num">01</span><span class="txt"><b>Staff speaks naturally</b> into a tablet — no scripts, no menus, no waiting for an interpreter to be free.</span></div>
+    <div class="bullet"><span class="num">02</span><span class="txt"><b>Passenger scans a QR code</b> with their own phone — no app install, no account, no setup.</span></div>
+    <div class="bullet"><span class="num">03</span><span class="txt">Speech is translated in real time and delivered <b>both as text and spoken aloud</b>, in both directions.</span></div>
+    <div class="bullet"><span class="num">04</span><span class="txt">Built on real-time, speech-to-speech AI (Gemini live audio) — not a text-translation app retrofitted for conversation.</span></div>
+  </div>
+  <div class="footer"><div class="brand"><span class="dot"></span><span>AeroTranslate</span></div><span>03</span></div>
+</section>
+
+<!-- 4. HOW IT WORKS -->
+<section id="slide4" class="slide tint">
+  <span class="eyebrow on-light">How it works</span>
+  <h1 class="title small">Three steps. Zero shared language.</h1>
+  <div class="grid3">
+    <div class="step-card"><div class="step-icon">01</div><div class="step-title">Staff speaks naturally</div><div class="step-body">Tap once, talk like normal — no scripts, no menus, no waiting for a translator to be free.</div></div>
+    <div class="step-card"><div class="step-icon">02</div><div class="step-title">Translated instantly — shown and spoken</div><div class="step-body">The passenger sees the translation on their phone and hears it spoken aloud in their own language, seconds later.</div></div>
+    <div class="step-card"><div class="step-icon">03</div><div class="step-title">Passenger replies the same way</div><div class="step-body">They tap their mic and answer back — translated into staff's language, read aloud right there on the tablet.</div></div>
+  </div>
+  <div class="footer"><div class="brand"><span class="dot"></span><span>AeroTranslate</span></div><span>04</span></div>
+</section>
+
+<!-- 5. PRODUCT -->
+<section id="slide5" class="slide dark">
+  <div class="dotgrid"></div>
+  <div style="position:relative;">
+    <span class="eyebrow on-dark">Product</span>
+    <h1 class="title small" style="color:#fff;">Working demo — staff tablet and passenger phone, paired in seconds</h1>
+  </div>
+  <div style="position:relative; height:360px; margin-top:20px;">
+    <div class="phone-mock" style="left:60px; top:10px; transform:rotate(-3deg);">
+      <div class="phone-live"><span class="ld"></span><span style="font-size:11px; font-weight:600; color:var(--green); letter-spacing:0.04em;">LIVE</span><span style="margin-left:auto; font-size:10px; font-weight:700; color:#9ca3af;">🇹🇷 TR</span></div>
+      <div class="phone-bubble-a">
+        <div style="font-size:13px; font-weight:600; color:#18181b;">Bagajınızı 5 numaralı bantan alabilirsiniz.</div>
+        <div style="font-size:11px; color:#9ca3af; margin-top:6px;"><span style="font-weight:700; color:#9ca3af;">🇬🇧 EN</span> Your bags are on belt number 5.</div>
+      </div>
+    </div>
+    <div class="phone-mock" style="right:60px; top:160px; transform:rotate(2.5deg);">
+      <div class="phone-live" style="justify-content:flex-end;"><span style="font-size:10px; font-weight:700; color:#9ca3af;">🇯🇵 JA</span><span class="ld" style="background:var(--red);"></span></div>
+      <div class="phone-bubble-b">
+        <div style="font-size:13px; font-weight:600; color:#18181b;">ありがとうございます！</div>
+        <div style="font-size:11px; color:#b98a90; margin-top:6px;">Thank you so much! <span style="font-weight:700;">🇬🇧 EN</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="lede" style="margin-top:10px;">No installation. No account. Scan a code, speak, and hear it translated back in seconds — live today across 14 languages.</p>
+  <div class="footer"><div class="brand"><span class="dot"></span><span style="color:#fff;">AeroTranslate</span></div><span>05</span></div>
+</section>
+
+<!-- 6. WHY NOW -->
+<section id="slide6" class="slide light">
+  <span class="eyebrow on-light">Why now</span>
+  <h1 class="title small">This works now. It didn't five years ago.</h1>
+  <div class="bullets">
+    <div class="bullet"><span class="num">01</span><span class="txt"><b>Real-time speech-to-speech AI finally clears the bar.</b> Latency and accuracy are now low and high enough for live, face-to-face conversation — not just batch text translation.</span></div>
+    <div class="bullet"><span class="num">02</span><span class="txt"><b>Passengers already carry the only hardware needed.</b> QR-pairing to a personal phone means zero install, zero friction, and zero devices for an airline to buy, issue, or maintain.</span></div>
+    <div class="bullet"><span class="num">03</span><span class="txt"><b>Staffing pressure makes "hire more bilingual staff" an expensive, slow lever.</b> Software is the lever that scales across every counter and every shift.</span></div>
+  </div>
+  <div class="footer"><div class="brand"><span class="dot"></span><span>AeroTranslate</span></div><span>06</span></div>
+</section>
+
+<!-- 7. MARKET & BUSINESS MODEL -->
+<section id="slide7" class="slide tint">
+  <span class="eyebrow on-light">Market &amp; business model</span>
+  <h1 class="title small">Where this fits, and how it makes money</h1>
+  <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap: 26px; margin-top: 30px;">
+    <div class="card">
+      <div style="font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; color:#18181b; margin-bottom:10px;">Market</div>
+      <div style="font-size:14.5px; line-height:1.6; color:#52525b;">
+        Global air travel moves billions of passengers a year through thousands of airports, and the language services industry built to bridge gaps like this is itself estimated in the tens of billions of dollars annually <span style="color:#a1a1aa;">(industry estimates, e.g. CSA Research / Nimdzi)</span> — without a tool built for live, two-way, no-install conversation at the gate.
+        <br/><br/>
+        Buyers: airlines, ground handling companies, airports, and lounges — anywhere staff and passengers need to communicate without a shared language.
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; color:#18181b; margin-bottom:10px;">Business model <span style="font-size:11px; color:#a1a1aa; font-weight:600;">(planned)</span></div>
+      <div style="font-size:14.5px; line-height:1.6; color:#52525b;">
+        B2B subscription priced per active counter or per agent seat, tiered by usage volume and language coverage.
+        <br/><br/>
+        Enterprise tier: custom vocabulary for boarding announcements and aviation terminology, plus usage reporting for ops teams.
+      </div>
+    </div>
+  </div>
+  <div class="footer"><div class="brand"><span class="dot"></span><span>AeroTranslate</span></div><span>07</span></div>
+</section>
+
+<!-- 8. COMPETITION -->
+<section id="slide8" class="slide light">
+  <span class="eyebrow on-light">Why not just&hellip;</span>
+  <h1 class="title small">Human interpreters, translation apps, and dedicated devices all fall short</h1>
+  <table class="cmp">
+    <tr><th style="width:20%;"></th><th>For staff &amp; passengers, in real time</th><th>For the business</th></tr>
+    <tr><td>Human interpreters</td><td>Limited availability, scheduling delays, can't cover every language on every shift.</td><td>Expensive per-interaction; doesn't scale across every counter.</td></tr>
+    <tr><td>Generic translation apps</td><td>Built for one device passed back and forth — not a live two-way conversation flow.</td><td>Not tuned for noisy gate environments or aviation vocabulary.</td></tr>
+    <tr><td>Dedicated translator hardware</td><td>Decent accuracy, but the passenger never holds the device — staff relays everything.</td><td>Per-unit hardware cost, logistics, loss &amp; repair to manage.</td></tr>
+    <tr class="us"><td>AeroTranslate</td><td class="yes">Live, two-way, spoken and shown on the passenger's own phone.</td><td class="yes">Zero hardware to issue — web-based, scales per seat.</td></tr>
+  </table>
+  <div class="footer"><div class="brand"><span class="dot"></span><span>AeroTranslate</span></div><span>08</span></div>
+</section>
+
+<!-- 9. TRACTION / STATUS -->
+<section id="slide9" class="slide tint">
+  <span class="eyebrow on-light">Where we are</span>
+  <h1 class="title small">A working end-to-end prototype, pre-launch</h1>
+  <div class="bullets">
+    <div class="bullet"><span class="num">01</span><span class="txt"><b>Fully working demo</b>: staff tablet and passenger phone, paired by QR code, live speech-to-speech translation in both directions.</span></div>
+    <div class="bullet"><span class="num">02</span><span class="txt"><b>14 languages live</b> in the current build today — including Hausa, informed directly by prior work on multilingual AI for African languages.</span></div>
+    <div class="bullet"><span class="num">03</span><span class="txt">Built on production-grade infrastructure — a real-time backend (Convex) and Gemini live speech — not a throwaway demo script.</span></div>
+    <div class="bullet"><span class="num">04</span><span class="txt">No pilot customers yet. We're pre-launch — this is exactly the gap we want an accelerator's support to close.</span></div>
+  </div>
+  <div class="lang-grid">
+    <div class="lang-chip"><span class="flag">🇹🇷</span>Turkish</div>
+    <div class="lang-chip"><span class="flag">🇯🇵</span>Japanese</div>
+    <div class="lang-chip"><span class="flag">🇬🇧</span>English</div>
+    <div class="lang-chip"><span class="flag">🇪🇸</span>Spanish</div>
+    <div class="lang-chip"><span class="flag">🇫🇷</span>French</div>
+    <div class="lang-chip"><span class="flag">🇩🇪</span>German</div>
+    <div class="lang-chip"><span class="flag">🇮🇹</span>Italian</div>
+    <div class="lang-chip"><span class="flag">🇵🇹</span>Portuguese</div>
+    <div class="lang-chip"><span class="flag">🇸🇦</span>Arabic</div>
+    <div class="lang-chip"><span class="flag">🇨🇳</span>Chinese</div>
+    <div class="lang-chip"><span class="flag">🇰🇷</span>Korean</div>
+    <div class="lang-chip"><span class="flag">🇷🇺</span>Russian</div>
+    <div class="lang-chip"><span class="flag">🇮🇳</span>Hindi</div>
+    <div class="lang-chip hl"><span class="flag">🇳🇬</span>Hausa</div>
+  </div>
+  <div class="footer"><div class="brand"><span class="dot"></span><span>AeroTranslate</span></div><span>09</span></div>
+</section>
+
+<!-- 10. TEAM -->
+<section id="slide10" class="slide light">
+  <span class="eyebrow on-light">Team</span>
+  <h1 class="title small">Complementary, not overlapping — the whole stack, no outside help needed</h1>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-avatar">HJ</div>
+      <div class="team-name">Hassan Jaeh</div>
+      <div class="team-role">Founder</div>
+      <div class="team-bio">Senior frontend &amp; full-stack engineer. Has built and shipped production applications at founding-stage companies and in longer-tenured engineering roles.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">AY</div>
+      <div class="team-name">Ahmad Rufai Yusuf</div>
+      <div class="team-role">Co-founder</div>
+      <div class="team-bio">AI research engineer &amp; product designer. Previously built multilingual AI products for African languages, including Hausa — direct prior experience in the exact language-detection and translation problem AeroTranslate solves.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar">HI</div>
+      <div class="team-name">Hussain Ilyasu</div>
+      <div class="team-role">Co-founder</div>
+      <div class="team-bio">Full-stack engineer. Has shipped production React Native applications with real-time data and payments.</div>
+    </div>
+  </div>
+  <p class="lede" style="margin-top:30px;">Between the three of us, we can move from product design through AI integration to a deployed application — without bringing in outside help for any core part of the stack.</p>
+  <div class="footer"><div class="brand"><span class="dot"></span><span>AeroTranslate</span></div><span>10</span></div>
+</section>
+
+<!-- 11. ASK -->
+<section id="slide11" class="slide dark">
+  <div class="dotgrid"></div>
+  <div style="position:relative;">
+    <span class="eyebrow on-dark">What we're looking for</span>
+    <h1 class="title small" style="color:#fff;">Help us turn a working prototype into our first pilot</h1>
+  </div>
+  <div class="ask-grid" style="position:relative;">
+    <div class="ask-card"><div class="lbl">Pilot deployment</div><div class="body">Support and introductions to land a first pilot with a ground handling company, airline, or airport.</div></div>
+    <div class="ask-card"><div class="lbl">Industry access</div><div class="body">Connections into aviation and ground operations decision-makers who can validate the workflow and pricing.</div></div>
+    <div class="ask-card"><div class="lbl">Go-to-market guidance</div><div class="body">Help shaping an enterprise sales motion for a three-person team selling into a regulated, relationship-driven industry.</div></div>
+    <div class="ask-card"><div class="lbl">Capital &amp; runway</div><div class="body">Resources to take the team from working demo to a paying first customer.</div></div>
+  </div>
+  <div class="footer">
+    <div class="brand"><span class="dot"></span><span style="color:#fff;">AeroTranslate</span></div>
+    <span>hassanjaeh@gmail.com</span>
+  </div>
+</section>
+
+</body>
+</html>
