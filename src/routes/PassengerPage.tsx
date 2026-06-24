@@ -14,5 +14,5 @@ export function PassengerPage() {
     return <StatusScreen title="Connecting…" />;
   }
 
-  return <PassengerPhone session={session} messages={messages} fullscreen />;
+  return <PassengerPhone session={session} messages={messages} />;
 }

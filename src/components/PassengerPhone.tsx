@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Doc } from "../../convex/_generated/dataModel";
@@ -10,29 +10,13 @@ import { flagFor, nameFor } from "../lib/lang";
 interface PassengerPhoneProps {
   session: Doc<"sessions">;
   messages: Doc<"messages">[];
-  fullscreen?: boolean;
 }
 
-function useClock() {
-  const [time, setTime] = useState(() => formatNow());
-  useEffect(() => {
-    const id = setInterval(() => setTime(formatNow()), 30_000);
-    return () => clearInterval(id);
-  }, []);
-  return time;
-}
-
-function formatNow(): string {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
-
-export function PassengerPhone({ session, messages, fullscreen }: PassengerPhoneProps) {
+export function PassengerPhone({ session, messages }: PassengerPhoneProps) {
   const connectPassenger = useMutation(api.sessions.connectPassenger);
   const recog = useGeminiRecorder();
   const synth = useGeminiSpeech();
   const playback = useChunkPlayback();
-  const time = useClock();
 
   // The moment the passenger's page loads, give staff a language to speak
   // into right away instead of making them wait for the passenger's first
@@ -169,38 +153,15 @@ export function PassengerPhone({ session, messages, fullscreen }: PassengerPhone
 
   const speaking = synth.speaking || playback.speaking;
 
-  const content = (
+  return (
     <div
       onPointerDown={() => {
         synth.unlock();
         playback.unlock();
       }}
-      className={`bg-gradient-to-br from-slate-50 via-white to-rose-50/50 overflow-hidden flex flex-col relative ${
-        fullscreen ? "w-screen h-screen" : "w-full h-full rounded-[44px]"
-      }`}
+      className="bg-gradient-to-br from-slate-50 via-white to-rose-50/50 overflow-hidden flex flex-col relative w-screen h-screen"
     >
-      <div className="h-13 flex-none flex items-center justify-between px-7.5 relative">
-        <span className="text-sm font-semibold text-zinc-950 tracking-tight">{time}</span>
-        <div className="absolute left-1/2 top-2.75 -translate-x-1/2 w-27 h-7.5 bg-neutral-950 rounded-full" />
-        <div className="flex items-center gap-1.5">
-          <svg width="17" height="12" viewBox="0 0 17 12" fill="#0A0A0A">
-            <rect x="0" y="7" width="3" height="5" rx="1"></rect>
-            <rect x="4.5" y="4.5" width="3" height="7.5" rx="1"></rect>
-            <rect x="9" y="2" width="3" height="10" rx="1"></rect>
-            <rect x="13.5" y="0" width="3" height="12" rx="1" opacity=".3"></rect>
-          </svg>
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="#0A0A0A">
-            <path d="M8 2.5c2.1 0 4 .8 5.4 2.1l1.1-1.2A9.5 9.5 0 0 0 8 1 9.5 9.5 0 0 0 1.5 3.4l1.1 1.2A7.9 7.9 0 0 1 8 2.5zm0 3c1.2 0 2.3.5 3.1 1.2l1.1-1.2A6 6 0 0 0 8 4 6 6 0 0 0 3.8 5.5l1.1 1.2A4.4 4.4 0 0 1 8 5.5zm0 3c.5 0 1 .2 1.4.6L8 10.5 6.6 9.1c.4-.4.9-.6 1.4-.6z"></path>
-          </svg>
-          <svg width="26" height="13" viewBox="0 0 26 13" fill="none">
-            <rect x="1" y="1" width="21" height="11" rx="3" stroke="#0A0A0A" strokeOpacity=".35"></rect>
-            <rect x="3" y="3" width="16" height="7" rx="1.5" fill="#0A0A0A"></rect>
-            <rect x="23.5" y="4" width="1.8" height="5" rx=".9" fill="#0A0A0A" fillOpacity=".4"></rect>
-          </svg>
-        </div>
-      </div>
-
-      <div className="flex-none flex justify-center pt-4.5">
+      <div className="flex-none flex justify-center pt-9">
         <div className="bg-gray-100 rounded-full px-3.75 py-2 text-[13px] font-semibold text-neutral-700 flex items-center gap-1.5">
           <span className="text-gray-500">Detected:</span>{" "}
           {session.toLang ? (
@@ -277,14 +238,6 @@ export function PassengerPhone({ session, messages, fullscreen }: PassengerPhone
           </button>
         </div>
       </div>
-    </div>
-  );
-
-  if (fullscreen) return content;
-
-  return (
-    <div className="flex-none w-104 h-209 bg-neutral-950 rounded-[56px] p-3 shadow-[0_2px_6px_rgba(0,0,0,0.18),0_24px_48px_-12px_rgba(0,0,0,0.4)] relative">
-      {content}
     </div>
   );
 }

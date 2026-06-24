@@ -448,7 +448,7 @@ export function StaffTablet({ session, messages, fullscreen, onNewConversation }
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 bg-white rounded-3xl shadow-sm p-4 flex flex-col overflow-hidden">
+          {/* <div className="flex-1 min-h-0 bg-white rounded-3xl shadow-sm p-4 flex flex-col overflow-hidden">
             <div className="flex-none flex items-center gap-2 mb-2">
               <span className="w-1.5 h-1.5 rounded-full bg-aero-red" />
               <span className="font-display text-xs font-semibold uppercase tracking-widest text-gray-500">
@@ -466,7 +466,7 @@ export function StaffTablet({ session, messages, fullscreen, onNewConversation }
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

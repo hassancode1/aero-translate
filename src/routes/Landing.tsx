@@ -77,12 +77,20 @@ export function Landing() {
           <div className="w-2.75 h-2.75 rounded-full bg-gradient-to-br from-aero-red to-aero-red-pressed" />
           <span className="font-display text-lg font-semibold text-white tracking-tight">AeroTranslate</span>
         </div>
-        <Link
-          to="/demo"
-          className="font-display text-[13px] font-semibold text-white border border-white/25 hover:border-white/50 rounded-full px-4.5 py-2 transition-colors"
-        >
-          Try the demo
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/pitchdeck"
+            className="font-display text-[13px] font-semibold text-zinc-300 hover:text-white transition-colors"
+          >
+            Pitch deck
+          </Link>
+          <Link
+            to="/demo"
+            className="font-display text-[13px] font-semibold text-white border border-white/25 hover:border-white/50 rounded-full px-4.5 py-2 transition-colors"
+          >
+            Try the demo
+          </Link>
+        </div>
       </header>
 
       {/* Hero */}
