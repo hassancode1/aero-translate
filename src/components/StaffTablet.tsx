@@ -62,8 +62,6 @@ interface StaffTabletProps {
 
 export function StaffTablet({ session, messages, fullscreen, onNewConversation }: StaffTabletProps) {
   const convex = useConvex();
-  const chips = useQuery(api.chips.list);
-  const sendInstant = useMutation(api.messages.sendInstant);
   const setFromLang = useMutation(api.sessions.setFromLang);
   const recog = useGeminiRecorder();
   const synth = useGeminiSpeech();
@@ -239,11 +237,6 @@ export function StaffTablet({ session, messages, fullscreen, onNewConversation }
       return;
     }
     void recog.start(session._id, "staff", session.toLang);
-  }
-
-  function chipPress(tr: string, jp: string) {
-    if (recog.recording || recog.processing) return;
-    void sendInstant({ sessionId: session._id, speaker: "staff", original: tr, translated: jp });
   }
 
   return (
@@ -448,25 +441,6 @@ export function StaffTablet({ session, messages, fullscreen, onNewConversation }
             </div>
           </div>
 
-          {/* <div className="flex-1 min-h-0 bg-white rounded-3xl shadow-sm p-4 flex flex-col overflow-hidden">
-            <div className="flex-none flex items-center gap-2 mb-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-aero-red" />
-              <span className="font-display text-xs font-semibold uppercase tracking-widest text-gray-500">
-                Quick phrases
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto flex flex-col gap-2">
-              {(chips ?? []).map((c) => (
-                <button
-                  key={c.label}
-                  className="w-full text-left px-3.5 py-2.5 rounded-2xl bg-gray-50 hover:bg-gray-100 text-gray-600 text-sm font-medium transition-colors cursor-pointer"
-                  onClick={() => chipPress(c.tr, c.jp)}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div> */}
         </div>
       </div>
     </div>
